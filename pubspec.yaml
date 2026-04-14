@@ -1,0 +1,27 @@
+name: notes_list
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^3.0.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  build_runner: ^2.4.9
+  riverpod_annotation: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  riverpod_generator: ^3.0.0
+  riverpod_lint: ^3.0.0
+
+flutter:
+  uses-material-design: true
