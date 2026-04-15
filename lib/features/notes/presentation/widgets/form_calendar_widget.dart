@@ -1,51 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:notes_list/core/statics/color_library.dart';
-
 import '../../providers/note_form_provider.dart';
 
 /// Открытие календаря для основной страницы
 void openFormCalendar(
     BuildContext context,
     TextEditingController controller,
-    DateTime currentDate,
-    NoteFormNotifier notifier) {
+    NoteFormNotifier notifier,
+    ) {
 
-  final int day;
-  final int month;
-  final int year;
+  /// Переданный день
+  int day;
+  /// Переданный месяц
+  int month;
+  /// Переданный год
+  int year;
+  /// Текст контроллера
+  final text = controller.text;
 
-  if (controller.text.isEmpty) {
-    day = currentDate.day;
-    month = currentDate.month;
-    year = currentDate.year;
+  if (text.isEmpty) {
+    final now = DateTime.now();
+    day = now.day;
+    month = now.month;
+    year = now.year;
   } else {
-    final list = controller.text.split('.');
-    day = list[0][0] != '0' ? int.parse(list[0]) : int.parse(list[0][1]);
-    month = list[1][0] != '0' ? int.parse(list[1]) : int.parse(list[1][1]);
-    year = int.parse(list[2]);
+    final parts = text.split('.');
+    if (parts.length == 3) {
+      day = int.tryParse(parts[0]) ?? DateTime.now().day;
+      month = int.tryParse(parts[1]) ?? DateTime.now().month;
+      year = int.tryParse(parts[2]) ?? DateTime.now().year;
+    } else {
+      final now = DateTime.now();
+      day = now.day;
+      month = now.month;
+      year = now.year;
+    }
   }
+
+  /// Выбранная дата, отображающаяся в календаре
+  DateTime displayedMonth = DateTime(year, month, 1);
 
   showDialog(
     context: context,
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
-          // Первый день месяца
-          final firstDayOfMonth = DateTime(year, month, 1);
+          // Первый день месяца выбранной даты
+          final firstDayOfMonth = DateTime(displayedMonth.year, displayedMonth.month, 1);
           // Количество дней в месяце
-          final daysInMonth = DateTime(year, month + 1, 0).day;
+          final daysInMonth = DateTime(displayedMonth.year, displayedMonth.month + 1, 0).day;
           // День недели первого дня
           final firstWeekday = firstDayOfMonth.weekday;
-          // Количество пустых ячеек в первом дне
+          // Количество пустых дней в неделе перед первым днем
           final offset = firstWeekday - 1;
           // Количество недель в месяце
           final weeksInMonth = ((offset + daysInMonth) / 7).ceil();
           // Высота недели
           const weekHeight = 45;
-          // Высота контейнера
+          // Базовая высота контейнера
           final containerHeight = 60 + (weeksInMonth * weekHeight);
-          // Ограничение размеров контейнера
-          final calculatedHeight = containerHeight.clamp(60 + (4 * weekHeight), 60 + (6 * weekHeight)).toDouble();
+          // Ограничения высоты контейнера в зависимости от количества недель
+          final calculatedHeight = containerHeight
+              .clamp(60 + (4 * weekHeight), 60 + (6 * weekHeight))
+              .toDouble();
 
           return Dialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -63,20 +80,31 @@ void openFormCalendar(
                         padding: EdgeInsets.zero,
                         onPressed: () {
                           setState(() {
-                            currentDate = DateTime(year, month - 1, 1);
+                            displayedMonth = DateTime(
+                                displayedMonth.year,
+                                displayedMonth.month - 1, 1
+                            );
                           });
                         },
                       ),
                       Text(
-                        '${_getMonthName(month)} $year',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: ColorLibrary.mainGray),
+                        '${_getMonthName(displayedMonth.month)} ${displayedMonth.year}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: ColorLibrary.mainGray,
+                        ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.chevron_right, size: 18),
                         padding: EdgeInsets.zero,
                         onPressed: () {
                           setState(() {
-                            currentDate = DateTime(year, month + 1, 1);
+                            displayedMonth = DateTime(
+                                displayedMonth.year,
+                                displayedMonth.month + 1,
+                                1
+                            );
                           });
                         },
                       ),
@@ -89,7 +117,11 @@ void openFormCalendar(
                       child: Text(
                         day,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: ColorLibrary.mainGray),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: ColorLibrary.mainGray,
+                        ),
                       ),
                     ))
                         .toList(),
@@ -111,7 +143,11 @@ void openFormCalendar(
                         }
 
                         final dayOfMonth = index - offset + 1;
-                        final newDay = DateTime(year, month, dayOfMonth);
+                        final newDay = DateTime(
+                            displayedMonth.year,
+                            displayedMonth.month,
+                            dayOfMonth
+                        );
 
                         final isSelected = newDay.day == day &&
                             newDay.month == month &&
@@ -119,10 +155,9 @@ void openFormCalendar(
 
                         return GestureDetector(
                           onTap: () {
-                            setState(() {
-                              currentDate = newDay;
-                              controller.text = notifier.toFormatDate(currentDate);
-                            });
+                            final formattedDate = notifier.toFormatDate(newDay);
+                            controller.text = formattedDate;
+                            controller.notifyListeners();
                             Navigator.of(context).pop();
                           },
                           child: Container(
@@ -155,6 +190,9 @@ void openFormCalendar(
 
 /// Метод, возвращающий название месяца
 String _getMonthName(int month) {
-  const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+  const months = [
+    'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн',
+    'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
+  ];
   return months[month - 1];
 }

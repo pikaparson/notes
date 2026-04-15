@@ -18,41 +18,82 @@ class NoteFormScreenClass extends ConsumerStatefulWidget {
   const NoteFormScreenClass({super.key});
 
   @override
-  ConsumerState<NoteFormScreenClass> createState() => _NoteFormScreenClassState();
+  ConsumerState<NoteFormScreenClass> createState() =>
+      _NoteFormScreenClassState();
 }
 
 class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
-
-  /// Страница для редактирования
+  /// Флаг – создание новой заметки или редактирование
   late bool isCreate;
 
-  /// Заметка
+  /// Заметка (для редактирования)
   late NoteClass note;
 
-  /// Дата азметки для заполнения
-  DateTime date = DateTime.now();
+  /// Контроллеры полей
+  late TextEditingController nameController;
+  late TextEditingController descriptionController;
+  late TextEditingController dateController;
+  late TextEditingController colorController;
+  late TextEditingController typeController;
+  late TextEditingController timeController;
 
-  /// Создание страницы
+  /// Флаг, чтобы не переинициализировать контроллеры при каждом didChangeDependencies
+  bool _controllersInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController();
+    descriptionController = TextEditingController();
+    dateController = TextEditingController();
+    colorController = TextEditingController();
+    typeController = TextEditingController();
+    timeController = TextEditingController();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    if (args?['note'] != null) {
-      note = args?['note'] as NoteClass;
-      date = note.date ?? DateTime.now();
+
+    if (!_controllersInitialized) {
+      _controllersInitialized = true;
+
+      if (args?['note'] != null) {
+        note = args?['note'] as NoteClass;
+        isCreate = false;
+        nameController.text = note.name ?? '';
+        descriptionController.text = note.description ?? '';
+        dateController.text = ref.read(noteFormProvider.notifier).toFormatDate(note.date);
+      } else {
+        isCreate = true;
+        final initialDate = args?['date'] as DateTime? ?? DateTime.now();
+        note = NoteClass(
+          name: '',
+          date: initialDate,
+          color: CardColors.Red,
+          type: NoteTypes.Text,
+        );
+        dateController.text = ref.read(noteFormProvider.notifier).toFormatDate(initialDate);
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(noteFormProvider.notifier).loadNote(note);
+        if (args?['note'] != null) {
+          ref.read(noteFormProvider.notifier).loadNote(note);
+        }
       });
-    } else {
-      date = args?['date'] as DateTime? ?? DateTime.now();
-      note = NoteClass(
-        name: '',
-        date: date,
-        color: CardColors.Red,
-        type: NoteTypes.Text,
-      ); // или создайте пустую заметку с дефолтными значениями
     }
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    descriptionController.dispose();
+    dateController.dispose();
+    colorController.dispose();
+    typeController.dispose();
+    timeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -60,49 +101,49 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
     final state = ref.watch(noteFormProvider);
     final notifier = ref.read(noteFormProvider.notifier);
 
-    bool isEdit = state.note != null;
-
-    TextEditingController nameController = TextEditingController(
-        text: note.name
-    );
-    TextEditingController descriptionController = TextEditingController(
-      text: note.description
-    );
-    TextEditingController dateController = TextEditingController(
-      text: notifier.toFormatDate(note.date),
-    );
-    TextEditingController colorController = TextEditingController();
-    TextEditingController typeController = TextEditingController();
-    TextEditingController timeController = TextEditingController();
-    bool isList = false;
+    final bool isEdit = state.note != null;
 
     return Scaffold(
       backgroundColor: ColorLibrary.white,
       body: Padding(
-        padding: EdgeInsets.only(left: 20, right: 20, top: 45),
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 45),
         child: Column(
           children: [
             titleNoteForm(context, isEdit),
-            SizedBox(height: 20,),
+            const SizedBox(height: 20),
             Expanded(
-                child: SingleChildScrollView(
-                  child: Form(
-                      child: Column(
-                        children: [
-                          /// ToDo: сделать функцию, которая заполняет текст контроллеров, если передается заметка (note != null)
-                          fieldWidgetClass(context, nameController, FieldTypes.name, date, notifier),
-                          SizedBox(height: 10,),
-                          fieldWidgetClass(context, descriptionController, FieldTypes.description, date, notifier),
-                          SizedBox(height: 10,),
-                          fieldWidgetClass(context, dateController, FieldTypes.date, date, notifier),
-                          SizedBox(height: 10,),
-                        ],
-                      )
+              child: SingleChildScrollView(
+                child: Form(
+                  child: Column(
+                    children: [
+                      fieldWidgetClass(
+                        context,
+                        nameController,
+                        FieldTypes.name,
+                        notifier,
+                      ),
+                      const SizedBox(height: 10),
+                      fieldWidgetClass(
+                        context,
+                        descriptionController,
+                        FieldTypes.description,
+                        notifier,
+                      ),
+                      const SizedBox(height: 10),
+                      fieldWidgetClass(
+                        context,
+                        dateController,
+                        FieldTypes.date,
+                        notifier,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                   ),
                 ),
+              ),
             ),
             Padding(
-              padding: EdgeInsets.only(bottom: 45),
+              padding: const EdgeInsets.only(bottom: 45),
               child: isEdit ? buttonsForEdit() : saveButton(),
             ),
           ],
@@ -116,9 +157,8 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         deleteNoteButton(),
-        saveButtonMini()
+        saveButtonMini(),
       ],
     );
   }
 }
-

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:notes_list/core/data/classes/note_class.dart';
 import 'package:notes_list/core/data/enums/note_types.dart';
 import 'package:notes_list/features/notes/providers/note_states.dart';
@@ -6,7 +5,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/data/classes/list_item_class.dart';
 import '../../../core/data/enums/colors.dart';
-import '../presentation/widgets/field_widget/field_types.dart';
 
 part 'note_form_provider.g.dart';
 

@@ -11,55 +11,49 @@ Widget fieldWidgetClass(
     BuildContext context,
     TextEditingController controller,
     FieldTypes type,
-    DateTime currentDate,
-    NoteFormNotifier notifier
+    NoteFormNotifier notifier,
     ) {
-
   // Возвращение названия поля
   Widget getNameField() {
     switch (type) {
-      case (FieldTypes.name):
+      case FieldTypes.name:
         return Row(
           children: [
-            Text('Название заметки', style: StyleLibrary.main,),
-            SizedBox(
-              width: 5,
-            ),
-            Text('*', style: StyleLibrary.main.copyWith(color: ColorLibrary.redCard),)
+            Text('Название заметки', style: StyleLibrary.main),
+            const SizedBox(width: 5),
+            Text('*', style: StyleLibrary.main.copyWith(color: ColorLibrary.redCard)),
           ],
         );
-      case (FieldTypes.description):
+      case FieldTypes.description:
         return Row(
           children: [
-            Text('Описание заметки', style: StyleLibrary.main,),
+            Text('Описание заметки', style: StyleLibrary.main),
           ],
         );
-      case (FieldTypes.date):
+      case FieldTypes.date:
         return Row(
           children: [
-            Text('Дата заметки', style: StyleLibrary.main,),
-            SizedBox(
-              width: 5,
-            ),
-            Text('*', style: StyleLibrary.main.copyWith(color: ColorLibrary.redCard),)
+            Text('Дата заметки', style: StyleLibrary.main),
+            const SizedBox(width: 5),
+            Text('*', style: StyleLibrary.main.copyWith(color: ColorLibrary.redCard)),
           ],
         );
-      case (FieldTypes.color):
+      case FieldTypes.color:
         return Row(
           children: [
-            Text('Цвет карточки', style: StyleLibrary.main,),
+            Text('Цвет карточки', style: StyleLibrary.main),
           ],
         );
-      case (FieldTypes.type):
+      case FieldTypes.type:
         return Row(
           children: [
-            Text('Тип заметки', style: StyleLibrary.main,),
+            Text('Тип заметки', style: StyleLibrary.main),
           ],
         );
-      case (FieldTypes.time):
+      case FieldTypes.time:
         return Row(
           children: [
-            Text('Время', style: StyleLibrary.main,),
+            Text('Время', style: StyleLibrary.main),
           ],
         );
     }
@@ -70,7 +64,7 @@ Widget fieldWidgetClass(
     if (type == FieldTypes.date) {
       return GestureDetector(
         onTap: () {
-          openFormCalendar(context, controller, currentDate, notifier);
+          openFormCalendar(context, controller, notifier);
         },
         child: SizedBox(
           height: 25,
@@ -82,7 +76,7 @@ Widget fieldWidgetClass(
         ),
       );
     }
-    return SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 
   // Возвращение поля
@@ -108,15 +102,15 @@ Widget fieldWidgetClass(
         isDense: true,
         suffixIcon: getIcon(),
       ),
-
     );
   }
 
+  // Целый виджет поля для заполнения
   return Column(
     children: [
       getNameField(),
-      SizedBox(height: 5,),
-      field(type)
+      const SizedBox(height: 5),
+      field(type),
     ],
   );
 }
