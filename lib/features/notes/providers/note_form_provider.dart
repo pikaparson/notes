@@ -113,6 +113,15 @@ class NoteFormNotifier extends _$NoteFormNotifier {
     }
   }
 
+  /// Получение выбранного цвета
+  Color getCurrentColor(String text) {
+    try {
+      return getColorByName(text);
+    } catch (e) {
+      return ColorLibrary.redCard;
+    }
+  }
+
   /// Создание заметки и возвращение на главный экран
   /// ToDo: Дописать
   void addNoteAndCloseScreen({

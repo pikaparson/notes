@@ -21,15 +21,6 @@ Widget fieldWidget(
   // Идентификатор кнопки поля для выбора цвета
   final GlobalKey colorSuffixKey = GlobalKey();
 
-  // Получить выбранный цвет
-  Color getCurrentColor() {
-    try {
-      return notifier.getColorByName(controller.text);
-    } catch (e) {
-      return ColorLibrary.redCard;
-    }
-  }
-
   // Функция открытия выпадающего меню
   Future<void> showColorMenu() async {
 
@@ -149,7 +140,7 @@ Widget fieldWidget(
           width: 20,
           height: 20,
           margin: EdgeInsets.all(10),
-          color: getCurrentColor(),
+          color: notifier.getCurrentColor(controller.text),
         ),
       );
     }
