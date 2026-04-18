@@ -21,50 +21,29 @@ Widget titleMain(DateTime date, BuildContext context, MainState state, MainNotif
               'Заметки',
               style: StyleLibrary.title,
             ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    /// ToDo: виджет сортировки, передача в функцию
-                  },
-                  child: SizedBox(
+            GestureDetector(
+              onTap: () {
+                openMainCalendar(context, state, notifier);
+              },
+              child: Row(
+                children: [
+                  SizedBox(
                     height: 25,
                     width: 25,
                     child: Icon(
-                      Icons.sort,
+                      Icons.date_range,
                       color: ColorLibrary.mainGray,
                     ),
                   ),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    openMainCalendar(context, state, notifier);
-                  },
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        height: 25,
-                        width: 25,
-                        child: Icon(
-                          Icons.date_range,
-                          color: ColorLibrary.mainGray,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text(
-                        '$day.$month',
-                        style: StyleLibrary.date,
-                      )
-                    ],
+                  SizedBox(
+                    width: 5,
                   ),
-                ),
-              ],
+                  Text(
+                    '$day.$month',
+                    style: StyleLibrary.date,
+                  )
+                ],
+              ),
             ),
           ],
         ),

@@ -34,8 +34,6 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
   late TextEditingController descriptionController;
   late TextEditingController dateController;
   late TextEditingController colorController;
-  late TextEditingController typeController;
-  late TextEditingController timeController;
 
   /// Флаг, чтобы не переинициализировать контроллеры при каждом didChangeDependencies
   bool _controllersInitialized = false;
@@ -47,8 +45,6 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
     descriptionController = TextEditingController();
     dateController = TextEditingController();
     colorController = TextEditingController();
-    typeController = TextEditingController();
-    timeController = TextEditingController();
   }
 
   @override
@@ -66,6 +62,7 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
         nameController.text = note.name ?? '';
         descriptionController.text = note.description ?? '';
         dateController.text = ref.read(noteFormProvider.notifier).toFormatDate(note.date);
+        colorController.text = ref.read(noteFormProvider.notifier).getDisplayName(note.color);
       } else {
         isCreate = true;
         final initialDate = args?['date'] as DateTime? ?? DateTime.now();
@@ -76,6 +73,7 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
           type: NoteTypes.Text,
         );
         dateController.text = ref.read(noteFormProvider.notifier).toFormatDate(initialDate);
+        colorController.text = 'Красный';
       }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (args?['note'] != null) {
@@ -91,8 +89,6 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
     descriptionController.dispose();
     dateController.dispose();
     colorController.dispose();
-    typeController.dispose();
-    timeController.dispose();
     super.dispose();
   }
 
@@ -116,27 +112,33 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
                 child: Form(
                   child: Column(
                     children: [
-                      fieldWidgetClass(
+                      fieldWidget(
                         context,
                         nameController,
                         FieldTypes.name,
                         notifier,
                       ),
                       const SizedBox(height: 10),
-                      fieldWidgetClass(
+                      fieldWidget(
                         context,
                         descriptionController,
                         FieldTypes.description,
                         notifier,
                       ),
                       const SizedBox(height: 10),
-                      fieldWidgetClass(
+                      fieldWidget(
                         context,
                         dateController,
                         FieldTypes.date,
                         notifier,
                       ),
                       const SizedBox(height: 10),
+                      fieldWidget(
+                        context,
+                        colorController,
+                        FieldTypes.color,
+                        notifier,
+                      ),
                     ],
                   ),
                 ),

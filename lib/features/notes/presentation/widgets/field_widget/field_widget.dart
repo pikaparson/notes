@@ -2,17 +2,91 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notes_list/core/statics/color_library.dart';
 import 'package:notes_list/core/statics/style_library.dart';
+import '../../../../../core/data/enums/colors.dart';
 import '../../../providers/note_form_provider.dart';
 import '../form_calendar_widget.dart';
 import 'field_types.dart';
 
 /// Виджет-поле для ввода
-Widget fieldWidgetClass(
+Widget fieldWidget(
     BuildContext context,
     TextEditingController controller,
     FieldTypes type,
     NoteFormNotifier notifier,
     ) {
+
+  // Идентификатор поля для ввода
+  final GlobalKey textFieldKey = GlobalKey();
+
+  // Идентификатор кнопки поля для выбора цвета
+  final GlobalKey colorSuffixKey = GlobalKey();
+
+  // Получить выбранный цвет
+  Color getCurrentColor() {
+    try {
+      return notifier.getColorByName(controller.text);
+    } catch (e) {
+      return ColorLibrary.redCard;
+    }
+  }
+
+  // Функция открытия выпадающего меню
+  Future<void> showColorMenu() async {
+
+    final RenderBox? fieldBox = textFieldKey.currentContext?.findRenderObject() as RenderBox?;
+    if (fieldBox == null) return;
+    final Offset fieldOffset = fieldBox.localToGlobal(Offset.zero);
+    final Size fieldSize = fieldBox.size;
+
+    final RelativeRect position = RelativeRect.fromLTRB(
+      fieldOffset.dx,
+      fieldOffset.dy + fieldSize.height,
+      fieldOffset.dx + fieldSize.width,
+      fieldOffset.dy + fieldSize.height,
+    );
+
+    final List<CardColors> colors = CardColors.values;
+
+    final String? selectedName = await showMenu<String>(
+      context: context,
+      position: position,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: ColorLibrary.mainGray),
+      ),
+      constraints: BoxConstraints(
+        maxWidth: fieldSize.width,
+        minWidth: fieldSize.width
+      ),
+      elevation: 4,
+      color: ColorLibrary.white,
+      items: colors.map((cardColor) {
+        final String name = notifier.getDisplayName(cardColor);
+        final Color color = notifier.getColor(cardColor);
+        final bool isSelected = controller.text == name;
+        return PopupMenuItem<String>(
+          value: name,
+          child: Row(
+            children: [
+              Container(width: 20, height: 20, color: color),
+              const SizedBox(width: 8),
+              Text(
+                name,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+
+    if (selectedName != null && selectedName != controller.text) {
+      controller.text = selectedName;
+    }
+  }
+
   // Возвращение названия поля
   Widget getNameField() {
     switch (type) {
@@ -45,44 +119,51 @@ Widget fieldWidgetClass(
           ],
         );
       case FieldTypes.type:
-        return Row(
-          children: [
-            Text('Тип заметки', style: StyleLibrary.main),
-          ],
-        );
+        return const SizedBox.shrink();
       case FieldTypes.time:
-        return Row(
-          children: [
-            Text('Время', style: StyleLibrary.main),
-          ],
-        );
+        return const SizedBox.shrink();
     }
   }
 
   // Возвращение кнопки поля
-  Widget getIcon() {
+  Widget? getIcon() {
     if (type == FieldTypes.date) {
       return GestureDetector(
         onTap: () {
           openFormCalendar(context, controller, notifier);
         },
-        child: SizedBox(
-          height: 25,
-          width: 25,
+        child: const SizedBox(
+          height: 20,
+          width: 20,
           child: Icon(
             Icons.date_range,
             color: ColorLibrary.mainGray,
           ),
         ),
       );
+    } else if (type == FieldTypes.color) {
+      return GestureDetector(
+        key: colorSuffixKey,
+        onTap: showColorMenu,
+        child: Container(
+          width: 20,
+          height: 20,
+          margin: EdgeInsets.all(10),
+          color: getCurrentColor(),
+        ),
+      );
     }
-    return const SizedBox.shrink();
+    return null;
   }
 
   // Возвращение поля
   Widget field(FieldTypes type) {
     return TextFormField(
+      key: textFieldKey,
       controller: controller,
+      readOnly: type == FieldTypes.color,
+      minLines: 1,
+      maxLines: type == FieldTypes.description ? 5 : 1,
       decoration: InputDecoration(
         filled: true,
         fillColor: ColorLibrary.white,
@@ -105,7 +186,6 @@ Widget fieldWidgetClass(
     );
   }
 
-  // Целый виджет поля для заполнения
   return Column(
     children: [
       getNameField(),

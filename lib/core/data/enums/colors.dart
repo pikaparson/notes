@@ -30,7 +30,7 @@ enum CardColors {
   Pink,
   @HiveField(8)
   /// Коричневый
-  Brown
+  Brown,
 }
 
 /// Адаптер для цветов карточек
