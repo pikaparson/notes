@@ -155,7 +155,7 @@ void openFormCalendar(
 
                         return GestureDetector(
                           onTap: () {
-                            final formattedDate = notifier.toFormatDate(newDay);
+                            final formattedDate = notifier.dateToString(newDay);
                             controller.text = formattedDate;
                             controller.notifyListeners();
                             Navigator.of(context).pop();

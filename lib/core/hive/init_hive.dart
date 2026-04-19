@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
+import '../data/classes/list_item_class.dart';
 import '../data/classes/note_class.dart';
 import '../data/enums/colors.dart';
 import '../data/enums/note_types.dart';
@@ -10,4 +11,5 @@ Future<void> initHive() async {
   Hive.registerAdapter(NoteClassAdapter());
   Hive.registerAdapter(ColorsAdapter());
   Hive.registerAdapter(NoteTypesAdapter());
+  Hive.registerAdapter(ListItemClassAdapter());
 }

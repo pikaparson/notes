@@ -34,7 +34,8 @@ class NoteClass {
 
   @HiveField(6)
   /// Элементы списка
-  List<ListItemClass>? listItems;
+  /// ToDo: ввести в эксплуатацию после курсовой
+  List<ListItemClass> listItems;
 
   @HiveField(7)
   /// Дата создания заметки
@@ -48,7 +49,7 @@ class NoteClass {
     required this.color,
     required this.type,
     this.time,
-    this.listItems,
+    required this.listItems,
     DateTime? createDate,
   }) : createDate = createDate ?? DateTime.now();
 
@@ -93,7 +94,7 @@ class NoteClassAdapter extends TypeAdapter<NoteClass> {
         color: fields[3] as CardColors,
         type: fields[4] as NoteTypes,
         time: fields[5] as DateTime?,
-        listItems: fields[6] as List<ListItemClass>?,
+        listItems: (fields[6] as List).cast<ListItemClass>(),
         createDate: fields[7] as DateTime,
     );
   }

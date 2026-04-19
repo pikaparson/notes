@@ -52,8 +52,8 @@ Widget fieldWidget(
       elevation: 4,
       color: ColorLibrary.white,
       items: colors.map((cardColor) {
-        final String name = notifier.getDisplayName(cardColor);
-        final Color color = notifier.getColor(cardColor);
+        final String name = notifier.getDisplayNameByEnum(cardColor);
+        final Color color = notifier.getColorByEnum(cardColor);
         final bool isSelected = controller.text == name;
         return PopupMenuItem<String>(
           value: name,

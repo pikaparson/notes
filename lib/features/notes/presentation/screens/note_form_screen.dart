@@ -61,8 +61,8 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
         isCreate = false;
         nameController.text = note.name ?? '';
         descriptionController.text = note.description ?? '';
-        dateController.text = ref.read(noteFormProvider.notifier).toFormatDate(note.date);
-        colorController.text = ref.read(noteFormProvider.notifier).getDisplayName(note.color);
+        dateController.text = ref.read(noteFormProvider.notifier).dateToString(note.date);
+        colorController.text = ref.read(noteFormProvider.notifier).getDisplayNameByEnum(note.color);
       } else {
         isCreate = true;
         final initialDate = args?['date'] as DateTime? ?? DateTime.now();
@@ -71,8 +71,9 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
           date: initialDate,
           color: CardColors.Red,
           type: NoteTypes.Text,
+          listItems: [],
         );
-        dateController.text = ref.read(noteFormProvider.notifier).toFormatDate(initialDate);
+        dateController.text = ref.read(noteFormProvider.notifier).dateToString(initialDate);
         colorController.text = 'Красный';
       }
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -146,7 +147,16 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 45),
-              child: isEdit ? buttonsForEdit() : saveButton(),
+              child: isEdit ? buttonsForEdit() : saveButton(
+                context,
+                notifier,
+                name: nameController.text,
+                description: descriptionController.text,
+                date: notifier.dateToDateTime(dateController.text),
+                color: notifier.getColorEnumByName(colorController.text),
+                time: null, // ToDo: тут должна быть передача значения поля "Время", которое отсутствует, на данный момент
+                listItems: [] // ToDo: список элементов спискка, который сейчас отсутствует
+              ),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:notes_list/core/data/classes/note_class.dart';
 import 'package:notes_list/core/data/enums/note_types.dart';
 import 'package:notes_list/features/notes/providers/note_states.dart';
@@ -6,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/data/classes/list_item_class.dart';
 import '../../../core/data/enums/colors.dart';
+import '../../../core/hive/hive_keys.dart';
 import '../../../core/statics/color_library.dart';
 
 part 'note_form_provider.g.dart';
@@ -23,20 +25,29 @@ class NoteFormNotifier extends _$NoteFormNotifier {
 
   /// Загрузка заметки
   void loadNote(NoteClass? note) {
-    state.copyWith(
+    state = state.copyWith(
         note: note
     );
   }
 
-  /// Форматирование даты
-  String toFormatDate(DateTime day) {
-    return '${day.day >= 10 ? day.day : '0${day.day}'}.'
-        '${day.month >= 10 ? day.month : '0${day.month}'}.'
-        '${day.year >= 10 ? day.year : '0${day.year}'}';
+  /// Форматирование даты в строку
+  String dateToString(DateTime date) {
+    return '${date.day >= 10 ? date.day : '0${date.day}'}.'
+        '${date.month >= 10 ? date.month : '0${date.month}'}.'
+        '${date.year >= 10 ? date.year : '0${date.year}'}';
   }
 
-  /// Получение название цвета для экрана
-  String getDisplayName(CardColors color) {
+  /// Форматирование даты в DateTime
+  DateTime dateToDateTime(String date) {
+    List<String> parts = date.split('.');
+    int day = int.parse(parts[0]);
+    int month = int.parse(parts[1]);
+    int year = int.parse(parts[2]);
+    return DateTime(year, month, day);
+  }
+
+  /// Получение название цвета для экрана по перечислению
+  String getDisplayNameByEnum(CardColors color) {
     switch (color) {
       case CardColors.Red:
         return 'Красный';
@@ -61,8 +72,8 @@ class NoteFormNotifier extends _$NoteFormNotifier {
     }
   }
 
-  /// Получение цвета
-  Color getColor(CardColors color) {
+  /// Получение цвета по перечислению
+  Color getColorByEnum(CardColors color) {
     switch (color) {
       case CardColors.Red:
         return  ColorLibrary.redCard;
@@ -113,6 +124,32 @@ class NoteFormNotifier extends _$NoteFormNotifier {
     }
   }
 
+  /// Получение перечисление цвета по его названию
+  CardColors getColorEnumByName(String name) {
+    switch (name) {
+      case 'Красный':
+        return CardColors.Red;
+      case 'Оранжевый':
+        return CardColors.Orange;
+      case 'Желтый':
+        return CardColors.Yellow;
+      case 'Зеленый':
+        return CardColors.Green;
+      case 'Голубой':
+        return CardColors.LightBlue;
+      case 'Синий':
+        return CardColors.Blue;
+      case 'Фиолетовый':
+        return CardColors.Violet;
+      case 'Розовый':
+        return CardColors.Pink;
+      case 'Коричневый':
+        return CardColors.Brown;
+      default:
+        return CardColors.Red;
+    }
+  }
+
   /// Получение выбранного цвета
   Color getCurrentColor(String text) {
     try {
@@ -122,27 +159,26 @@ class NoteFormNotifier extends _$NoteFormNotifier {
     }
   }
 
+  /// Открытие хранилищ
+  static Future<Box<NoteClass>> _openBoxIfNeeded(String key) async {
+    if (!Hive.isBoxOpen(key)) {
+      return await Hive.openBox<NoteClass>(key);
+    }
+    return Hive.box<NoteClass>(key);
+  }
+
+  /// Получение hive-ключа по выбранной дате
+  static String _getHiveKeyByCurrentDate(DateTime currentDate) {
+    return '${HiveKeys.notes}_'
+        '${currentDate.year}${currentDate.month}${currentDate.day}';
+  }
+
   /// Создание заметки и возвращение на главный экран
-  /// ToDo: Дописать
-  void addNoteAndCloseScreen({
-    required String name,
-    String? description,
-    required DateTime date,
-    required CardColors color,
-    required NoteTypes type,
-    DateTime? time,
-    List<ListItemClass>? listItems,
-    required DateTime createDate
-  }) {
-    NoteClass newNote = NoteClass(
-        name: name,
-        description: description,
-        date: date,
-        color: color,
-        type: type,
-        time: time,
-        listItems: listItems
-    );
+  Future<void> addNoteAndCloseScreen(BuildContext context, NoteClass newNote) async {
+    final key = _getHiveKeyByCurrentDate(newNote.date);
+    Box<NoteClass> box = await _openBoxIfNeeded(key);
+    box.add(newNote);
+    Navigator.of(context).pop();
   }
 
   /// Обновление заметки и возвращение на главный экран

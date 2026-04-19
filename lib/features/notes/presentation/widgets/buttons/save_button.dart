@@ -1,13 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:notes_list/core/statics/style_library.dart';
 
+import '../../../../../core/data/classes/list_item_class.dart';
+import '../../../../../core/data/classes/note_class.dart';
+import '../../../../../core/data/enums/colors.dart';
+import '../../../../../core/data/enums/note_types.dart';
 import '../../../../../core/statics/color_library.dart';
+import '../../../providers/note_form_provider.dart';
 
 /// Кнопка "Сохранить"
-/// ToDo: передает функцию
-Widget saveButton() {
+Widget saveButton(
+    BuildContext context,
+    NoteFormNotifier notifier,{
+      required String name,
+      String? description,
+      required DateTime date,
+      required CardColors color,
+      DateTime? time,
+      required List<ListItemClass> listItems,
+    }) {
   return GestureDetector(
-    onTap: () {},
+    onTap: () {
+      NoteClass newNote = NoteClass(
+          name: name,
+          description: description,
+          date: date,
+          color: color,
+          type: NoteTypes.Text,
+          time: time,
+          listItems: listItems
+      );
+      notifier.addNoteAndCloseScreen(context, newNote);
+    },
     child: Container(
       decoration: BoxDecoration(
           color: ColorLibrary.mainGray,
