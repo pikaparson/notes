@@ -147,11 +147,90 @@ Widget fieldWidget(
     return null;
   }
 
+  // Валидация поля названия заметки
+  String? nameValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Поле обязательно для заполнения';
+    }
+    return null;
+  }
+
+  // Валидация поля даты
+  String? dateValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Поле не заполнено';
+    }
+
+    final parts = value.split('.');
+    if (parts.length != 3) {
+      return 'Поле не заполнено';
+    }
+
+    final dayStr = parts[0];
+    final monthStr = parts[1];
+    final yearStr = parts[2];
+
+    final day = int.tryParse(dayStr);
+    final month = int.tryParse(monthStr);
+    final year = int.tryParse(yearStr);
+
+    if (year == null || year < 2000) {
+      return 'Поле не заполнено';
+    }
+
+    // Проверяем диапазоны
+    if (month == null || month < 1 || month > 12) {
+      return 'Месяц должен быть от 01 до 12';
+    }
+
+    // Проверяем февраль
+    if (month == 2) {
+      final isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+      if (isLeapYear && (day == null || day > 29)) {
+        return 'В високосном году в феврале не больше 29 дней';
+      }
+      if (!isLeapYear && (day == null || day > 28)) {
+        return 'В невисокосном году в феврале не больше 28 дней';
+      }
+    }
+
+    // Проверяем количество дней в месяце
+    final daysInMonth = DateTime(year, month + 1, 0).day;
+    if (day == null || day < 1 || day > daysInMonth) {
+      return 'В этом месяце от 01 до $daysInMonth дней';
+    }
+
+    // Проверяем 30-дневные месяцы
+    if ([4, 6, 9, 11].contains(month) && (day == null || day > 30)) {
+      return 'В этом месяце не больше 30 дней';
+    }
+
+    // Проверяем 31-дневные месяцы
+    if ([1, 3, 5, 7, 8, 10, 12].contains(month) && (day == null || day > 31)) {
+      return 'В этом месяце не больше 31 дня';
+    }
+
+    return null;
+  }
+
+  // Выбор валидатора
+  String? validator(String? value) {
+    if (type == FieldTypes.name) {
+      return nameValidator(value);
+    }
+    if (type == FieldTypes.date) {
+      return dateValidator(value);
+    }
+    return null;
+  }
+
   // Возвращение поля
   Widget field(FieldTypes type) {
     return TextFormField(
       key: textFieldKey,
       controller: controller,
+      validator: validator,
+      autovalidateMode: AutovalidateMode.always,
       readOnly: type == FieldTypes.color,
       minLines: 1,
       maxLines: type == FieldTypes.description ? 5 : 1,
@@ -163,6 +242,10 @@ Widget fieldWidget(
           borderSide: const BorderSide(color: ColorLibrary.mainGray),
         ),
         enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: ColorLibrary.mainGray),
+        ),
+        errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: ColorLibrary.mainGray),
         ),
