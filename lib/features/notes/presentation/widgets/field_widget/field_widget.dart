@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:notes_list/core/statics/color_library.dart';
 import 'package:notes_list/core/statics/style_library.dart';
 import '../../../../../core/data/enums/colors.dart';
@@ -224,12 +225,27 @@ Widget fieldWidget(
     return null;
   }
 
+  // Выбор маски
+  MaskTextInputFormatter? inputFormatter() {
+    if (type == FieldTypes.date) {
+      return MaskTextInputFormatter(
+          mask: '##.##.####',
+          filter: {
+            "#": RegExp(r'[0-9]')
+          },
+          type: MaskAutoCompletionType.lazy
+      );
+    }
+    return null;
+  }
+
   // Возвращение поля
   Widget field(FieldTypes type) {
     return TextFormField(
       key: textFieldKey,
       controller: controller,
       validator: validator,
+      inputFormatters: [?inputFormatter()],
       autovalidateMode: AutovalidateMode.always,
       readOnly: type == FieldTypes.color,
       minLines: 1,
