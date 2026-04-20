@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:notes_list/core/statics/color_library.dart';
+import 'package:notes_list/features/notes/presentation/widgets/card_widget.dart';
 import '../../providers/main_provider.dart';
 import '../widgets/buttons/add_new_note_button.dart';
 import '../widgets/buttons/go_to_today_button.dart';
@@ -43,19 +45,34 @@ class _MainScreenClassState extends ConsumerState<MainScreenClass> {
           children: [
             titleMain(state.currentDate, context, state, notifier),
             weekWidget(state, notifier),
+            SizedBox(
+              height: 16,
+            ),
             if (!isToday) ...[
-              SizedBox(
-                height: 20,
-              ),
               goToTodayButton(notifier),
               SizedBox(
-                height: 20,
+                height: 16,
               ),
-            ] else ...[
-              SizedBox(
-                height: 20 + 30 + 20 // 20 - промежуток перед и после кнопки, 30 - высота кнопки,
+            ] ,
+            if (state.notes.isNotEmpty || state.notes != null)
+              Expanded(
+                child: SlidableAutoCloseBehavior(
+                  key: state.slidableKey,
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: state.notes.length,
+                    itemBuilder: (context, index) {
+                      final note = state.notes[index];
+                      return Column(
+                        children: [
+                          card(note, context),
+                          SizedBox(height: 12,)
+                        ],
+                      );
+                    }
+                  ),
+                ),
               ),
-            ],
           ],
         ),
       ),

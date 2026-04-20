@@ -11,34 +11,39 @@ import '../../../providers/note_form_provider.dart';
 /// Кнопка "Сохранить"
 Widget saveButton(
     BuildContext context,
-    NoteFormNotifier notifier,{
-      required String name,
-      String? description,
-      required DateTime date,
-      required CardColors color,
+    NoteFormNotifier notifier, {
+      required TextEditingController nameController,
+      required TextEditingController descriptionController,
+      required TextEditingController dateController,
+      required TextEditingController colorController,
+      required GlobalKey<FormState> formKey,
       DateTime? time,
       required List<ListItemClass> listItems,
-      required GlobalKey<FormState> formKey
     }) {
   return GestureDetector(
-    onTap:  () {
+    onTap: () {
       if (formKey.currentState?.validate() ?? false) {
-        NoteClass newNote = NoteClass(
-            name: name,
-            description: description,
-            date: date,
-            color: color,
-            type: NoteTypes.Text,
-            time: time,
-            listItems: listItems
+        final name = nameController.text;
+        final description = descriptionController.text.isEmpty ? null : descriptionController.text;
+        final date = notifier.dateToDateTime(dateController.text);
+        final color = notifier.getColorEnumByName(colorController.text);
+
+        final newNote = NoteClass(
+          name: name,
+          description: description,
+          date: date,
+          color: color,
+          type: NoteTypes.Text,
+          time: time,
+          listItems: listItems,
         );
         notifier.addNoteAndCloseScreen(context, newNote);
       }
     },
     child: Container(
       decoration: BoxDecoration(
-          color: ColorLibrary.mainGray,
-          borderRadius: BorderRadius.circular(12)
+        color: ColorLibrary.mainGray,
+        borderRadius: BorderRadius.circular(12),
       ),
       width: 372,
       height: 50,

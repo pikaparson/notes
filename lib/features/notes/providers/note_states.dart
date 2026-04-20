@@ -1,4 +1,6 @@
 import 'dart:core';
+import 'package:flutter/cupertino.dart';
+
 import '../../../core/data/classes/note_class.dart';
 
 /// Состояния главного экрана
@@ -8,8 +10,10 @@ class MainState {
     required this.currentDate,
     required this.currentWeek,
     required this.notes,
-    DateTime? today
-  }) : today = today ?? DateTime.now();
+    DateTime? today,
+    UniqueKey? slidableKey,
+  }) : today = today ?? DateTime.now(),
+        slidableKey = slidableKey ?? UniqueKey();
 
   /// Выбранный день недели
   DateTime currentDate;
@@ -21,7 +25,10 @@ class MainState {
   DateTime today;
 
   /// Заметки выбранного дня
-  List<NoteClass>? notes;
+  List<NoteClass> notes;
+
+  /// Ключ для обновления списка из элементов с возможностью свайпа
+  final UniqueKey slidableKey;
 
   /// Возвращение копии с измененным состоянием
   MainState copyWith({

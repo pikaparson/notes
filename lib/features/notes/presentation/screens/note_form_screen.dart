@@ -154,14 +154,14 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
               child: isEdit ? buttonsForEdit() : saveButton(
                 context,
                 notifier,
-                name: nameController.text,
-                description: descriptionController.text,
-                date: notifier.dateToDateTime(dateController.text),
-                color: notifier.getColorEnumByName(colorController.text),
-                time: null, // ToDo: тут должна быть передача значения поля "Время", которое отсутствует, на данный момент
-                listItems: [], // ToDo: список элементов спискка, который сейчас отсутствует
-                formKey: _formKey
-              ),
+                nameController: nameController,
+                descriptionController: descriptionController,
+                dateController: dateController,
+                colorController: colorController,
+                formKey: _formKey,
+                time: null,
+                listItems: [],
+              )
             ),
           ],
         ),
