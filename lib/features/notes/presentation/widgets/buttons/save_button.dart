@@ -18,19 +18,22 @@ Widget saveButton(
       required CardColors color,
       DateTime? time,
       required List<ListItemClass> listItems,
+      required GlobalKey<FormState> formKey
     }) {
   return GestureDetector(
-    onTap: () {
-      NoteClass newNote = NoteClass(
-          name: name,
-          description: description,
-          date: date,
-          color: color,
-          type: NoteTypes.Text,
-          time: time,
-          listItems: listItems
-      );
-      notifier.addNoteAndCloseScreen(context, newNote);
+    onTap:  () {
+      if (formKey.currentState?.validate() ?? false) {
+        NoteClass newNote = NoteClass(
+            name: name,
+            description: description,
+            date: date,
+            color: color,
+            type: NoteTypes.Text,
+            time: time,
+            listItems: listItems
+        );
+        notifier.addNoteAndCloseScreen(context, newNote);
+      }
     },
     child: Container(
       decoration: BoxDecoration(
