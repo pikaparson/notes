@@ -4,8 +4,9 @@ import 'package:notes_list/core/data/classes/note_class.dart';
 import 'package:notes_list/core/statics/style_library.dart';
 import '../../../../core/data/enums/colors.dart';
 import '../../../../core/statics/color_library.dart';
+import '../../providers/main_provider.dart';
 
-Widget card(NoteClass note, BuildContext context) {
+Widget card(NoteClass note, BuildContext context, MainNotifier notifier) {
 
   /// Получение цвета по перечислению
   Color getColorByEnum(CardColors color) {
@@ -41,7 +42,8 @@ Widget card(NoteClass note, BuildContext context) {
       children: [
         SlidableAction(
           onPressed: (context) {
-
+            /// ToDo: диалоговое окно для подтверждения
+            notifier.deleteNote(note);
           },
           foregroundColor: ColorLibrary.mainGray,
           icon: Icons.delete,

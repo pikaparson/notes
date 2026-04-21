@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:notes_list/features/notes/providers/note_states.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../core/data/classes/list_item_class.dart';
 import '../../../core/data/classes/note_class.dart';
 import '../../../core/hive/hive_keys.dart';
 
@@ -132,21 +133,69 @@ class MainNotifier extends _$MainNotifier {
     return List.generate(7, (index) => monday.add(Duration(days: index)));
   }
 
+  /// Удаление заметки из хранилища и обновление состояния
+  Future<void> deleteNote(NoteClass note) async {
+    final key = _getHiveKeyByCurrentDate(note.date);
+    final box = await _openBoxIfNeeded(key);
+
+    final keysToDelete = <dynamic>[];
+    for (final k in box.keys) {
+      final existing = box.get(k);
+      if (existing != null && _notesEqual(existing, note)) {
+        keysToDelete.add(k);
+      }
+    }
+
+    for (final k in keysToDelete) {
+      await box.delete(k);
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback( (_) async {
+      state = state.copyWith(
+        notes: await getNotesByCurrentDate(state.currentDate),
+      );
+    });
+  }
+
+  /// Сравнение двух заметок по всем полям
+  bool _notesEqual(NoteClass a, NoteClass b) {
+    return a.name == b.name &&
+        a.description == b.description &&
+        a.date == b.date &&
+        a.color == b.color &&
+        a.type == b.type &&
+        a.time == b.time &&
+        _listItemsEqual(a.listItems, b.listItems);
+  }
+
+  /// Сравнение списков ListItemClass
+  bool _listItemsEqual(List<ListItemClass>? a, List<ListItemClass>? b) {
+    if (a == null && b == null) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i].name != b[i].name || a[i].isChecked != b[i].isChecked) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /// Переход на страницу с формой для заполнения для создания заметки
   void openFormScreenToAddNote(BuildContext context, DateTime currentDate) {
-     Navigator.of(context).pushNamed(
-     "/noteFormScreen",
-     arguments: {
-       'date': currentDate,
-     }
-     ).then((result) {
-       WidgetsBinding.instance.addPostFrameCallback( (_) async {
-         state = state.copyWith(
-           notes: await getNotesByCurrentDate(state.currentDate),
-         );
-       });
-      }
-     );
+    Navigator.of(context).pushNamed(
+        "/noteFormScreen",
+        arguments: {
+          'date': currentDate,
+        }
+    ).then((result) {
+      WidgetsBinding.instance.addPostFrameCallback( (_) async {
+        state = state.copyWith(
+          notes: await getNotesByCurrentDate(state.currentDate),
+        );
+      });
+    }
+    );
   }
 
   /// Переход на страницу с формой для заполнения для редактирования заметки

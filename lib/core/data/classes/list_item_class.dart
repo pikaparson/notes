@@ -10,12 +10,12 @@ class ListItemClass {
 
   @HiveField(1)
   /// Выполнен ли пункт
-  bool isCompleted;
+  bool isChecked;
 
   /// Конструктор
   ListItemClass({
     required this.name,
-    this.isCompleted = false,
+    this.isChecked = false,
   });
 
   /// Копия с изменениями
@@ -25,7 +25,7 @@ class ListItemClass {
   }) {
     return ListItemClass(
       name: name ?? this.name,
-      isCompleted: isCompleted ?? this.isCompleted,
+      isChecked: isCompleted ?? this.isChecked,
     );
   }
 }
@@ -43,7 +43,7 @@ class ListItemClassAdapter extends TypeAdapter<ListItemClass> {
     };
     return ListItemClass(
       name: fields[0] as String,
-      isCompleted: fields[1] as bool,
+      isChecked: fields[1] as bool,
     );
   }
 
@@ -54,7 +54,7 @@ class ListItemClassAdapter extends TypeAdapter<ListItemClass> {
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
-      ..write(obj.isCompleted);
+      ..write(obj.isChecked);
   }
 
   @override

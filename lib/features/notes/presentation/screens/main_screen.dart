@@ -65,7 +65,7 @@ class _MainScreenClassState extends ConsumerState<MainScreenClass> {
                       final note = state.notes[index];
                       return Column(
                         children: [
-                          card(note, context),
+                          card(note, context, notifier),
                           SizedBox(height: 12,)
                         ],
                       );

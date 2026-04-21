@@ -15,6 +15,7 @@ Widget titleNoteForm(BuildContext context, bool isEdit) {
           children: [
             GestureDetector(
               onTap: () {
+                /// ToDo: диалоговое окно с предупреждением о несохранении данных
                 Navigator.of(context).pop();
               },
               child: SizedBox(
