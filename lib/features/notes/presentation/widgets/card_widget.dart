@@ -6,7 +6,7 @@ import '../../../../core/data/enums/colors.dart';
 import '../../../../core/statics/color_library.dart';
 import '../../providers/main_provider.dart';
 
-Widget card(NoteClass note, BuildContext context, MainNotifier notifier) {
+Widget card(NoteClass note, DateTime currentDate, BuildContext context, MainNotifier notifier) {
 
   /// Получение цвета по перечислению
   Color getColorByEnum(CardColors color) {
@@ -52,7 +52,7 @@ Widget card(NoteClass note, BuildContext context, MainNotifier notifier) {
     ),
     child: GestureDetector(
       onTap: () {
-
+        notifier.openFormScreenToUpdateNote(context, note, currentDate);
       },
       child: Container(
         width: double.infinity,

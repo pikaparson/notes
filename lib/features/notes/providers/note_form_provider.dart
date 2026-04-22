@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:notes_list/core/data/classes/note_class.dart';
-import 'package:notes_list/core/data/enums/note_types.dart';
 import 'package:notes_list/features/notes/providers/note_states.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -21,6 +20,11 @@ class NoteFormNotifier extends _$NoteFormNotifier {
     return NoteFormState(
         note: null
     );
+  }
+
+  /// Сброс состояния
+  void reset() {
+    state = NoteFormState(note: null);
   }
 
   /// Загрузка заметки
@@ -181,26 +185,88 @@ class NoteFormNotifier extends _$NoteFormNotifier {
     Navigator.of(context).pop();
   }
 
-  /// Обновление заметки и возвращение на главный экран
-  /// ToDo: Дописать
-  void updateNoteAndCloseScreen({
-    required NoteClass note,
-    required String name,
-    String? description,
-    required DateTime date,
-    required CardColors color,
-    required NoteTypes type,
-    DateTime? time,
-    List<ListItemClass>? listItems,
-  }) {
-    NoteClass updateNote = note.copyWith(
-      name: name,
-      description: description,
-      date: date,
-      color: color,
-      type: type,
-      time: time,
-      listItems: listItems,
-    );
+  /// Сравнение списков ListItemClass
+  bool _listItemsEqual(List<ListItemClass>? a, List<ListItemClass>? b) {
+    if (a == null && b == null) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i].name != b[i].name || a[i].isChecked != b[i].isChecked) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Сравнение двух заметок по всем полям
+  bool _notesEqual(NoteClass a, NoteClass b) {
+    return a.name == b.name &&
+        a.description == b.description &&
+        a.date == b.date &&
+        a.color == b.color &&
+        a.type == b.type &&
+        a.time == b.time &&
+        _listItemsEqual(a.listItems, b.listItems);
+  }
+
+  /// Обновление заметки в хранилище (с учётом возможного изменения даты)
+  Future<void> updateNote(NoteClass oldNote, NoteClass updatedNote) async {
+
+    if (oldNote.date.year == updatedNote.date.year &&
+        oldNote.date.month == updatedNote.date.month &&
+        oldNote.date.day == updatedNote.date.day) {
+      final key = _getHiveKeyByCurrentDate(oldNote.date);
+      final box = await _openBoxIfNeeded(key);
+
+      dynamic keyToUpdate;
+      for (final k in box.keys) {
+        final existing = box.get(k);
+        if (existing != null && _notesEqual(existing, oldNote)) {
+          keyToUpdate = k;
+          break;
+        }
+      }
+      if (keyToUpdate != null) {
+        await box.put(keyToUpdate, updatedNote);
+      }
+    } else {
+      final oldKey = _getHiveKeyByCurrentDate(oldNote.date);
+      final oldBox = await _openBoxIfNeeded(oldKey);
+      dynamic keyToDelete;
+      for (final k in oldBox.keys) {
+        final existing = oldBox.get(k);
+        if (existing != null && _notesEqual(existing, oldNote)) {
+          keyToDelete = k;
+          break;
+        }
+      }
+      if (keyToDelete != null) {
+        await oldBox.delete(keyToDelete);
+      }
+
+      final newKey = _getHiveKeyByCurrentDate(updatedNote.date);
+      final newBox = await _openBoxIfNeeded(newKey);
+      await newBox.add(updatedNote);
+    }
+  }
+
+  /// Удаление заметки из хранилища и обновление состояния
+  Future<void> deleteNote(BuildContext context, NoteClass note) async {
+    final key = _getHiveKeyByCurrentDate(note.date);
+    final box = await _openBoxIfNeeded(key);
+
+    final keysToDelete = <dynamic>[];
+    for (final k in box.keys) {
+      final existing = box.get(k);
+      if (existing != null && _notesEqual(existing, note)) {
+        keysToDelete.add(k);
+      }
+    }
+
+    for (final k in keysToDelete) {
+      await box.delete(k);
+    }
+
+    Navigator.pop(context);
   }
 }

@@ -6,6 +6,7 @@ import 'package:notes_list/core/data/enums/note_types.dart';
 import 'package:notes_list/core/statics/color_library.dart';
 import 'package:notes_list/features/notes/providers/note_form_provider.dart';
 
+import '../../../../core/data/classes/list_item_class.dart';
 import '../widgets/buttons/delete_note_button.dart';
 import '../widgets/buttons/save_button.dart';
 import '../widgets/buttons/save_button_mini.dart';
@@ -98,10 +99,9 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(noteFormProvider);
     final notifier = ref.read(noteFormProvider.notifier);
 
-    final bool isEdit = state.note != null;
+    final isEdit = !isCreate;
 
     return Scaffold(
       backgroundColor: ColorLibrary.white,
@@ -151,7 +151,16 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 45),
-              child: isEdit ? buttonsForEdit() : saveButton(
+              child: isEdit ? buttonsForEdit(
+                notifier,
+                nameController,
+                descriptionController,
+                dateController,
+                colorController,
+                _formKey,
+                null,
+                [],
+              ) : saveButton(
                 context,
                 notifier,
                 nameController: nameController,
@@ -169,12 +178,36 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
     );
   }
 
-  Widget buttonsForEdit() {
+  Widget buttonsForEdit(
+      NoteFormNotifier notifier,
+      TextEditingController nameController,
+      TextEditingController descriptionController,
+      TextEditingController dateController,
+      TextEditingController colorController,
+      GlobalKey<FormState> formKey,
+      DateTime? time,
+      List<ListItemClass> listItems,
+      ) {
+    final name = nameController.text;
+    final description = descriptionController.text.isEmpty ? null : descriptionController.text;
+    final date = notifier.dateToDateTime(dateController.text);
+    final color = notifier.getColorEnumByName(colorController.text);
+
+    final newNote = NoteClass(
+      name: name,
+      description: description,
+      date: date,
+      color: color,
+      type: NoteTypes.Text,
+      time: time,
+      listItems: listItems,
+    );
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        deleteNoteButton(),
-        saveButtonMini(),
+        deleteNoteButton(context, note, notifier),
+        saveButtonMini(context, note, newNote, notifier),
       ],
     );
   }

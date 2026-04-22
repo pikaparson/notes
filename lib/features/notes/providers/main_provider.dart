@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/data/classes/list_item_class.dart';
 import '../../../core/data/classes/note_class.dart';
 import '../../../core/hive/hive_keys.dart';
+import 'note_form_provider.dart';
 
 part 'main_provider.g.dart';
 
@@ -183,6 +184,7 @@ class MainNotifier extends _$MainNotifier {
 
   /// Переход на страницу с формой для заполнения для создания заметки
   void openFormScreenToAddNote(BuildContext context, DateTime currentDate) {
+    ref.read(noteFormProvider.notifier).reset();
     Navigator.of(context).pushNamed(
         "/noteFormScreen",
         arguments: {
@@ -199,16 +201,18 @@ class MainNotifier extends _$MainNotifier {
   }
 
   /// Переход на страницу с формой для заполнения для редактирования заметки
-  /// ToDo: добавить передачу заметки
-  void openFormScreenToUpdateNote(BuildContext context, NoteClass? note) {
+  void openFormScreenToUpdateNote(BuildContext context, NoteClass? note, DateTime currentDate) {
+    ref.read(noteFormProvider.notifier).reset();
     Navigator.of(context).pushNamed(
       '/noteFormScreen',
       arguments: {
         'note': note,
       }
     ).then((result) {
-      WidgetsBinding.instance.addPostFrameCallback( (_) {
-        /// ToDo: добавить обновление заметки в Hive и в состоянии
+      WidgetsBinding.instance.addPostFrameCallback( (_) async {
+        state = state.copyWith(
+            notes: await getNotesByCurrentDate(state.currentDate),
+        );
       });
     }
     );
