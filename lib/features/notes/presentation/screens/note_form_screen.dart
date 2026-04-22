@@ -188,26 +188,33 @@ class _NoteFormScreenClassState extends ConsumerState<NoteFormScreenClass> {
       DateTime? time,
       List<ListItemClass> listItems,
       ) {
-    final name = nameController.text;
-    final description = descriptionController.text.isEmpty ? null : descriptionController.text;
-    final date = notifier.dateToDateTime(dateController.text);
-    final color = notifier.getColorEnumByName(colorController.text);
-
-    final newNote = NoteClass(
-      name: name,
-      description: description,
-      date: date,
-      color: color,
-      type: NoteTypes.Text,
-      time: time,
-      listItems: listItems,
-    );
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         deleteNoteButton(context, note, notifier),
-        saveButtonMini(context, note, newNote, notifier),
+        saveButtonMini(
+          context: context,
+          onPressed: () async {
+            final name = nameController.text;
+            final description = descriptionController.text.isEmpty
+                ? null
+                : descriptionController.text;
+            final date = notifier.dateToDateTime(dateController.text);
+            final color = notifier.getColorEnumByName(colorController.text);
+
+            final updatedNote = note.copyWith(
+              name: name,
+              description: description,
+              date: date,
+              color: color,
+              time: time,
+              listItems: listItems,
+            );
+
+            await notifier.updateNote(note, updatedNote);
+            if (context.mounted) Navigator.pop(context);
+          },
+        ),
       ],
     );
   }

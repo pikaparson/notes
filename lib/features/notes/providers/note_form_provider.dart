@@ -211,7 +211,6 @@ class NoteFormNotifier extends _$NoteFormNotifier {
 
   /// Обновление заметки в хранилище (с учётом возможного изменения даты)
   Future<void> updateNote(NoteClass oldNote, NoteClass updatedNote) async {
-
     if (oldNote.date.year == updatedNote.date.year &&
         oldNote.date.month == updatedNote.date.month &&
         oldNote.date.day == updatedNote.date.day) {
@@ -221,7 +220,7 @@ class NoteFormNotifier extends _$NoteFormNotifier {
       dynamic keyToUpdate;
       for (final k in box.keys) {
         final existing = box.get(k);
-        if (existing != null && _notesEqual(existing, oldNote)) {
+        if (existing != null && existing.id == oldNote.id) {
           keyToUpdate = k;
           break;
         }
@@ -235,7 +234,7 @@ class NoteFormNotifier extends _$NoteFormNotifier {
       dynamic keyToDelete;
       for (final k in oldBox.keys) {
         final existing = oldBox.get(k);
-        if (existing != null && _notesEqual(existing, oldNote)) {
+        if (existing != null && existing.id == oldNote.id) {
           keyToDelete = k;
           break;
         }
@@ -258,15 +257,13 @@ class NoteFormNotifier extends _$NoteFormNotifier {
     final keysToDelete = <dynamic>[];
     for (final k in box.keys) {
       final existing = box.get(k);
-      if (existing != null && _notesEqual(existing, note)) {
+      if (existing != null && existing.id == note.id) {
         keysToDelete.add(k);
       }
     }
-
     for (final k in keysToDelete) {
       await box.delete(k);
     }
-
     Navigator.pop(context);
   }
 }

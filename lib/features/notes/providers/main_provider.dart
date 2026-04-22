@@ -139,23 +139,24 @@ class MainNotifier extends _$MainNotifier {
     final key = _getHiveKeyByCurrentDate(note.date);
     final box = await _openBoxIfNeeded(key);
 
-    final keysToDelete = <dynamic>[];
+    dynamic keyToDelete;
     for (final k in box.keys) {
       final existing = box.get(k);
-      if (existing != null && _notesEqual(existing, note)) {
-        keysToDelete.add(k);
+      if (existing != null && existing.id == note.id) {
+        keyToDelete = k;
+        break;
       }
     }
 
-    for (final k in keysToDelete) {
-      await box.delete(k);
+    if (keyToDelete != null) {
+      await box.delete(keyToDelete);
     }
 
-    WidgetsBinding.instance.addPostFrameCallback( (_) async {
+    if (ref.mounted) {
       state = state.copyWith(
         notes: await getNotesByCurrentDate(state.currentDate),
       );
-    });
+    }
   }
 
   /// Сравнение двух заметок по всем полям

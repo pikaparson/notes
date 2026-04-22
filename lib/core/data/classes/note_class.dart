@@ -41,6 +41,10 @@ class NoteClass {
   /// Дата создания заметки
   final DateTime createDate;
 
+  @HiveField(8)
+  /// Идентификатор
+  final String id;
+
   /// Конструктор класса
   NoteClass({
     required this.name,
@@ -51,7 +55,11 @@ class NoteClass {
     this.time,
     required this.listItems,
     DateTime? createDate,
-  }) : createDate = createDate ?? DateTime.now();
+    String? id,
+  }) : createDate = createDate ?? DateTime.now(),
+        id = id ?? _generateId();
+
+  static String _generateId() => DateTime.now().millisecondsSinceEpoch.toString() + (DateTime.now().microsecondsSinceEpoch).toString();
 
   /// Возвращение измененной копии
   NoteClass copyWith({
@@ -61,7 +69,8 @@ class NoteClass {
     CardColors? color,
     NoteTypes? type,
     DateTime? time,
-    List<ListItemClass>? listItems
+    List<ListItemClass>? listItems,
+    String? id,
   }){
     return NoteClass(
       name: name ?? this.name,
@@ -71,7 +80,8 @@ class NoteClass {
       type: type ?? this.type,
       time: time ?? this.time,
       listItems: listItems ?? this.listItems,
-      createDate: createDate
+      createDate: createDate,
+      id: id ?? this.id,
     );
   }
 }
@@ -96,13 +106,14 @@ class NoteClassAdapter extends TypeAdapter<NoteClass> {
         time: fields[5] as DateTime?,
         listItems: (fields[6] as List).cast<ListItemClass>(),
         createDate: fields[7] as DateTime,
+        id: fields[8] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, NoteClass obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -118,7 +129,9 @@ class NoteClassAdapter extends TypeAdapter<NoteClass> {
       ..writeByte(6)
       ..write(obj.listItems)
       ..writeByte(7)
-      ..write(obj.createDate);
+      ..write(obj.createDate)
+      ..writeByte(8)
+      ..write(obj.id);
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:notes_list/core/statics/style_library.dart';
 import 'package:notes_list/features/notes/providers/note_form_provider.dart';
 
 import '../../../../../core/statics/color_library.dart';
+import '../alert_dialog/cancel_alert_dialog.dart';
 
 /// Тайтл страницы с формой для заполнения заметки
 Widget titleNoteForm(BuildContext context, bool isEdit) {
@@ -15,8 +16,7 @@ Widget titleNoteForm(BuildContext context, bool isEdit) {
           children: [
             GestureDetector(
               onTap: () {
-                /// ToDo: диалоговое окно с предупреждением о несохранении данных
-                Navigator.of(context).pop();
+                showCancelAlertDialog(context, isEdit);
               },
               child: SizedBox(
                 height: 20,

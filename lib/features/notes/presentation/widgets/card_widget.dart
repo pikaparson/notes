@@ -5,6 +5,7 @@ import 'package:notes_list/core/statics/style_library.dart';
 import '../../../../core/data/enums/colors.dart';
 import '../../../../core/statics/color_library.dart';
 import '../../providers/main_provider.dart';
+import 'alert_dialog/delete_note_alert_dialog.dart';
 
 Widget card(NoteClass note, DateTime currentDate, BuildContext context, MainNotifier notifier) {
 
@@ -42,8 +43,7 @@ Widget card(NoteClass note, DateTime currentDate, BuildContext context, MainNoti
       children: [
         SlidableAction(
           onPressed: (context) {
-            /// ToDo: диалоговое окно для подтверждения
-            notifier.deleteNote(note);
+            showDeleteNoteAlertDialog(context, note, notifier, null);
           },
           foregroundColor: ColorLibrary.mainGray,
           icon: Icons.delete,

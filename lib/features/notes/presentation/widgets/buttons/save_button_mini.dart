@@ -1,25 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:notes_list/core/statics/style_library.dart';
-
-import '../../../../../core/data/classes/note_class.dart';
 import '../../../../../core/statics/color_library.dart';
-import '../../../providers/note_form_provider.dart';
 
 /// Маленькая кнопка "Сохранить"
-Widget saveButtonMini(BuildContext context,
-    NoteClass oldNote,
-    NoteClass updatedNote,
-    NoteFormNotifier notifier
-    ) {
+Widget saveButtonMini({
+  required BuildContext context,
+  required VoidCallback onPressed,
+}) {
   return GestureDetector(
-    onTap: () {
-      notifier.updateNote(oldNote, updatedNote);
-      Navigator.pop(context);
-    },
+    onTap: onPressed,
     child: Container(
       decoration: BoxDecoration(
         color: ColorLibrary.mainGray,
-        borderRadius: BorderRadius.circular(12)
+        borderRadius: BorderRadius.circular(12),
       ),
       width: 155,
       height: 50,
