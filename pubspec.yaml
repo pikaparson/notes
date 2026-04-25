@@ -17,6 +17,7 @@ dependencies:
   riverpod_annotation: ^3.0.0
   mask_text_input_formatter: ^2.9.0
   flutter_slidable: ^4.0.3
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -27,3 +28,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/system_icon.png"

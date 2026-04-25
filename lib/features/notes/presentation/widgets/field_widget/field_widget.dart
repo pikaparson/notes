@@ -248,6 +248,7 @@ Widget fieldWidget(
       inputFormatters: [?inputFormatter()],
       autovalidateMode: AutovalidateMode.always,
       readOnly: type == FieldTypes.color,
+      keyboardType: type == FieldTypes.date ? TextInputType.numberWithOptions(signed: false, decimal: false) : null,
       minLines: 1,
       maxLines: type == FieldTypes.description ? 5 : 1,
       decoration: InputDecoration(
